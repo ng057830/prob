@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menú Principal | Para Naiara</title>
+
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --primary-light: #a29bfe;
+      --dark: #2d3436;
+      --light: #f9f9f9;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --font-main: 'Segoe UI', Roboto, sans-serif;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: var(--font-main);
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    h1 {
+      color: var(--primary);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    p.subtitle {
+      color: var(--dark);
+      opacity: 0.8;
+      margin-bottom: 2rem;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #fff;
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: background 0.3s, transform 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>¡Bienvenida Naiara!</h1>
+    <p class="subtitle">Elige la actividad que quieras practicar:</p>
+    <a href="aritmetica.html" class="btn">Progresión Aritmética</a>
+    <a href="geometrica.html" class="btn">Progresión Geométrica</a>
+  </div>
+</body>
+</html>

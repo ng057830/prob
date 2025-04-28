@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inversión de Carlos | Progresión Geométrica y Suma</title>
+
+  <!-- Chart.js & Plugins -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{
+      delimiters:[
+        {left:'$$',right:'$$',display:true},
+        {left:'$',right:'$',display:false}
+      ]
+    });"
+  ></script>
+
+  <style>
+    :root {
+      --primary: #0984e3;
+      --primary-light: #74b9ff;
+      --dark: #2d3436;
+      --light: #dfe6e9;
+      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+      --font-main: 'Segoe UI', Roboto, sans-serif;
+    }
+    * {margin:0;padding:0;box-sizing:border-box;}
+    body {
+      font-family: var(--font-main);
+      background: linear-gradient(135deg,#e0f7fa 0%,#b2ebf2 100%);
+      color: var(--dark);
+      overflow-x:hidden;
+    }
+    .container {max-width:1200px;margin:auto;padding:20px;}
+    header {text-align:center;margin-bottom:2rem;padding:1rem;background:#fff;border-radius:16px;box-shadow:var(--shadow);}
+    h1 {color:var(--primary);font-size:2rem;}
+    .subtitle {opacity:.8;}
+
+    section {margin-bottom:2rem;}
+    .introduction, .visualization, .resolution {
+      background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:2rem;
+    }
+    .known-data, .controls, .button-container {
+      display:flex;gap:1rem;flex-wrap:wrap;align-items:center;
+    }
+    .data-card {
+      background:#fff;padding:1.5rem;border-radius:12px;
+      box-shadow:var(--shadow);text-align:center;width:250px;
+    }
+    .data-card h3 {color:var(--primary);}
+    .data-value {font-size:2rem;font-weight:bold;}
+    .data-label {opacity:.7;}
+
+    .chart-container {height:300px;position:relative;margin-bottom:1.5rem;}
+    .slider-container{flex:1;}
+    .slider-label{font-weight:bold;display:block;margin-bottom:.5rem;}
+    .range-slider{width:100%;height:8px;border-radius:5px;background:var(--primary-light);}
+    .slider-value{margin-top:.3rem;font-weight:bold;}
+
+    .action-button {
+      flex:1;min-width:200px;background:var(--primary);color:#fff;
+      border:none;padding:.8rem;border-radius:8px;font-weight:bold;
+      cursor:pointer;transition:background .3s;
+    }
+    .action-button:hover{background:var(--primary-light);}
+
+    .formula-container, .result-container {
+      display:none;background:var(--light);padding:1.5rem;
+      border-radius:12px;
+    }
+    .step{margin-top:1rem;}
+
+    footer{text-align:center;padding:1rem 0;opacity:.7;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Inversión de Carlos</h1>
+      <p class="subtitle">Progresión geométrica y suma interactiva</p>
+    </header>
+
+    <section class="introduction">
+      <p>
+        Carlos invierte <strong>200 €</strong> al mes 1 con un <strong>i = <span id="rateValue">2</span>%</strong>.
+      </p>
+    </section>
+
+    <section class="known-data">
+      <div class="data-card">
+        <h3>Capital inicial</h3>
+        <div class="data-value">200 €</div>
+        <div class="data-label">$a_1$</div>
+      </div>
+      <div class="data-card">
+        <h3>Tasa mensual</h3>
+        <div class="data-value"><span id="rateDisplay">2</span>%</div>
+        <div class="data-label">$i$</div>
+      </div>
+      <div class="data-card">
+        <h3>Razón geométrica</h3>
+        <div class="data-value"><span id="rDisplay">1.02</span></div>
+        <div class="data-label">$r = 1 + i$</div>
+      </div>
+    </section>
+
+    <section class="visualization">
+      <h2>Crecimiento del capital</h2>
+      <div class="chart-container"><canvas id="growthChart"></canvas></div>
+      <div class="controls">
+        <div class="slider-container">
+          <label for="monthSlider" class="slider-label">
+            Meses: <span id="monthValue">8</span>
+          </label>
+          <input type="range" id="monthSlider" class="range-slider" min="1" max="24" value="8">
+        </div>
+        <div class="slider-container">
+          <label for="rateSlider" class="slider-label">
+            Tasa (%): <span id="rateDisplay2">2</span>
+          </label>
+          <input type="range" id="rateSlider" class="range-slider" min="0" max="10" value="2">
+        </div>
+      </div>
+    </section>
+
+    <section class="resolution">
+      <h2>Fórmulas y suma</h2>
+      <div class="button-container">
+        <button id="showFormulaBtn" class="action-button">Ver fórmulas</button>
+        <button id="showResultBtn" class="action-button">Mostrar suma</button>
+      </div>
+
+      <div id="formulaContainer" class="formula-container">
+        <div id="formulaGeneral"></div>
+        <div class="step" id="step1Geom"></div>
+        <div class="step" id="step2Geom"></div>
+        <div class="step" id="sumFormula"></div>
+      </div>
+
+      <div id="resultContainer" class="result-container">
+        <div id="stepSum"></div>
+        <div class="step" id="conclusion"></div>
+      </div>
+    </section>
+
+    <footer>
+      <p>© Para Naiara</p>
+    </footer>
+  </div>
+
+  <script>
+    Chart.register(ChartDataLabels);
+
+    const a1 = 200;
+    let months = 8, rate = 2;
+
+    // DOM
+    const monthSlider    = document.getElementById('monthSlider');
+    const rateSlider     = document.getElementById('rateSlider');
+    const monthValue     = document.getElementById('monthValue');
+    const rateDisplay    = document.getElementById('rateDisplay');
+    const rateDisplay2   = document.getElementById('rateDisplay2');
+    const rateValueEl    = document.getElementById('rateValue');
+    const rDisplay       = document.getElementById('rDisplay');
+    const formulaGeneral = document.getElementById('formulaGeneral');
+    const step1Geom      = document.getElementById('step1Geom');
+    const step2Geom      = document.getElementById('step2Geom');
+    const sumFormula     = document.getElementById('sumFormula');
+    const stepSum        = document.getElementById('stepSum');
+    const conclusion     = document.getElementById('conclusion');
+    const showFormulaBtn = document.getElementById('showFormulaBtn');
+    const showResultBtn  = document.getElementById('showResultBtn');
+    const formulaContainer = document.getElementById('formulaContainer');
+    const resultContainer   = document.getElementById('resultContainer');
+    const ctx             = document.getElementById('growthChart').getContext('2d');
+    let chart;
+
+    function genData(n, a1, r) {
+      const labels = [], data = [];
+      for (let i = 1; i <= n; i++) {
+        labels.push(`Mes ${i}`);
+        data.push(+(a1 * Math.pow(r, i-1)).toFixed(2));
+      }
+      return { labels, data };
+    }
+    function genColors(n) {
+      return Array.from({length:n},(_,i)=>{
+        const t=i/n, r=9+(16-9)*t, g=132+(235-132)*t, b=227+(242-227)*t;
+        return `rgba(${r},${g},${b},0.8)`;
+      });
+    }
+
+    function initChart(){
+      const {labels,data} = genData(months,a1,1+rate/100);
+      chart = new Chart(ctx,{
+        type:'bar',
+        data:{
+          labels,
+          datasets:[{
+            label:'Capital (€)',
+            data,
+            backgroundColor:genColors(months),
+            borderRadius:4,
+            datalabels:{
+              anchor:'end', align:'start',
+              color:varGet('--dark'),
+              font:{weight:'bold'},
+              formatter:v=>`${v}€`
+            }
+          }]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          scales:{
+            y:{beginAtZero:true,title:{display:true,text:'€'}},
+            x:{title:{display:true,text:'Mes'}}
+          },
+          plugins:{ tooltip:{enabled:false}, datalabels:{} },
+          onHover:(ev,els)=>ev.native.target.style.cursor=els.length?'pointer':'default'
+        }
+      });
+    }
+
+    function updateChart(){
+      const {labels,data} = genData(months,a1,1+rate/100);
+      chart.data.labels=labels;
+      chart.data.datasets[0].data=data;
+      chart.data.datasets[0].backgroundColor=genColors(months);
+      chart.update();
+    }
+
+    function updateFormulas(){
+      monthValue.textContent = months;
+      rateDisplay.textContent = rate;
+      rateDisplay2.textContent = rate;
+      rateValueEl.textContent = rate;
+      const R = (1 + rate/100).toFixed(3);
+      rDisplay.textContent = R;
+
+      // Fórmulas paso a paso
+      katex.render(`a_n = a_1\\cdot r^{n-1}`, formulaGeneral, {throwOnError:false});
+      katex.render(`a_1 = ${a1},\\quad i = ${rate}\\%,\\quad r = 1 + i = ${R}`, step1Geom, {throwOnError:false});
+      katex.render(`a_{${months}} = ${a1}\\cdot(${R})^{${months-1}}`, step2Geom, {throwOnError:false});    }
+
+    function showSum(){
+      const R = 1 + rate/100;
+      const sum = a1 * (1 - Math.pow(R, months)) / (1 - R);
+      // cálculo y conclusión
+      katex.render(
+        `S_{${months}} = \\frac{a_1(1 - r^n)}{1 - r} =\\frac{${a1}(1 - (${(1+rate/100).toFixed(3)})^{${months}})}{1 - ${(1+rate/100).toFixed(3)}} = ${sum.toFixed(2)}\\,€`,
+        stepSum, {throwOnError:false}
+      );
+      conclusion.textContent = `Conclusión: tras ${months} meses, Carlos habrá acumulado un total de ${sum.toFixed(2)} € al sumar cada término de la progresión geométrica.`;
+    }
+
+    function varGet(name){
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    // Event listeners
+    monthSlider.addEventListener('input',()=>{
+      months = +monthSlider.value;
+      updateChart(); updateFormulas();
+    });
+    rateSlider.addEventListener('input',()=>{
+      rate = +rateSlider.value;
+      updateChart(); updateFormulas();
+    });
+    showFormulaBtn.addEventListener('click',()=>{
+      resultContainer.style.display = 'none';
+      const show = formulaContainer.style.display!=='block';
+      formulaContainer.style.display = show?'block':'none';
+      if(show){ updateFormulas(); }
+    });
+    showResultBtn.addEventListener('click',()=>{
+      formulaContainer.style.display = 'none';
+      const show = resultContainer.style.display!=='block';
+      resultContainer.style.display = show?'block':'none';
+      if(show){ showSum(); }
+    });
+
+    window.addEventListener('DOMContentLoaded',()=>{
+      initChart();
+      updateFormulas();
+      gsap.from('.introduction',{opacity:0,y:20,duration:.6});
+      gsap.from('.visualization',{opacity:0,y:20,duration:.6,delay:.3});
+      gsap.from('.resolution',{opacity:0,y:20,duration:.6,delay:.6});
+    });
+  </script>
+</body>
+
+  <!-- Botón de regreso al menú -->
+  <div style="text-align:center; margin:2rem 0;">
+    <button
+      onclick="window.location.href='index.html';"
+      style="
+        background:#6c5ce7;
+        color:white;
+        border:none;
+        padding:.8rem 1.2rem;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:1rem;
+      "
+    >
+      ← Volver al menú
+    </button>
+  </div>
+
+
+</html>

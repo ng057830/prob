@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plan de Ahorro de María | Progresión Aritmética</title>
+
+  <!-- Chart.js & Plugins -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+
+  <!-- KaTeX -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+  />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script
+    defer
+    src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ]
+    });"
+  ></script>
+
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --primary-light: #a29bfe;
+      --dark: #2d3436;
+      --light: #f9f9f9;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --success: #00b894;
+      --font-main: 'Segoe UI', Roboto, sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font-main);
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+    .container { max-width: 1200px; margin: auto; padding: 20px; }
+    header {
+      text-align: center; margin-bottom: 2rem; padding: 1rem;
+      background: #fff; border-radius: 16px; box-shadow: var(--shadow);
+    }
+    h1 { color: var(--primary); font-size: 2rem; }
+    .subtitle { opacity: 0.8; }
+
+    /* Introducción */
+    .introduction {
+      background: #fff; border-radius: 16px; box-shadow: var(--shadow);
+      padding: 2rem; text-align: center; margin-bottom: 2rem;
+    }
+    .piggy-bank {
+      position: relative; width: 150px; height: 150px;
+      margin: auto 0 1rem; background: var(--primary-light);
+      border-radius: 50%; overflow: hidden;
+    }
+    .piggy-bank-body {
+      position: absolute; width: 100%; height: 100%;
+      background: var(--primary); border-radius: 50%;
+    }
+    .piggy-bank-ear {
+      position: absolute; top: 20%; right: 15%;
+      width: 25%; height: 25%; background: var(--primary-light);
+      border-radius: 50%;
+    }
+    .piggy-bank-slot {
+      position: absolute; top: 30%; left: 50%;
+      transform: translateX(-50%);
+      width: 40%; height: 5px; background: var(--dark);
+      border-radius: 3px;
+    }
+    .coin {
+      position: absolute; width: 20px; height: 20px;
+      background: #fdcb6e; border-radius: 50%;
+      top: 0; left: 50%; transform: translateX(-50%);
+    }
+
+    /* Datos conocidos */
+    .known-data {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 1.5rem; margin-bottom: 2rem;
+    }
+    .data-card {
+      background: #fff; padding: 1.5rem; border-radius: 12px;
+      box-shadow: var(--shadow); text-align: center; width: 250px;
+    }
+    .data-card h3 { color: var(--primary); }
+    .data-value { font-size: 2rem; font-weight: bold; }
+    .data-label { opacity: 0.7; }
+
+    /* Visualización */
+    .visualization {
+      background: #fff; padding: 2rem; border-radius: 16px;
+      box-shadow: var(--shadow); margin-bottom: 2rem;
+    }
+    .chart-container { height: 300px; margin-bottom: 1.5rem; position: relative; }
+    .controls {
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    @media(min-width:768px) {
+      .controls { flex-direction: row; }
+    }
+    .slider-container { flex: 1; }
+    .slider-label { font-weight: bold; margin-bottom: .5rem; display: block; }
+    .range-slider { width: 100%; height: 8px; border-radius: 5px; background: var(--primary-light); }
+    .slider-value { margin-top: .3rem; font-weight: bold; }
+
+    /* Resolución */
+    .resolution {
+      background: #fff; padding: 2rem; border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+    .button-container { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .action-button {
+      flex: 1; min-width: 200px; background: var(--primary); color: #fff;
+      border: none; padding: .8rem; border-radius: 8px; font-weight: bold;
+      cursor: pointer; transition: background .3s;
+    }
+    .action-button:hover { background: var(--primary-light); }
+
+    .formula-container, .sum-container {
+      display: none; background: var(--light); padding: 1.5rem; border-radius: 12px;
+      margin-top: 1rem;
+    }
+    .step { margin-top: 1rem; }
+
+    .progress-container {
+      position: relative; width: 100%; height: 24px; background: var(--light);
+      border-radius: 12px; overflow: hidden; margin: 1rem 0;
+    }
+    .progress-bar {
+      width: 0; height: 100%; background: var(--primary-light);
+      transition: width 1s ease;
+    }
+    .progress-label {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%); font-weight: bold;
+    }
+    .tooltip {
+      position: absolute; padding: .5rem 1rem; background: rgba(0,0,0,.7);
+      color: #fff; border-radius: 4px; pointer-events: none; opacity: 0;
+    }
+
+    footer { text-align: center; padding: 1rem 0; opacity: .7; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>El Plan de Ahorro de María</h1>
+      <p class="subtitle">Progresión aritmética dinámica</p>
+    </header>
+
+    <section class="introduction">
+      <div class="piggy-bank">
+        <div class="piggy-bank-body"></div>
+        <div class="piggy-bank-ear"></div>
+        <div class="piggy-bank-slot"></div>
+        <div id="coin" class="coin"></div>
+      </div>
+      <p>María empieza ahorrando <strong>10 €</strong> y cada mes incrementa su ahorro.</p>
+    </section>
+
+    <section class="known-data">
+      <div class="data-card">
+        <h3>Primer término</h3>
+        <div class="data-value">10 €</div>
+        <div class="data-label">$a_1$</div>
+      </div>
+      <div class="data-card">
+        <h3>Incremento</h3>
+        <div class="data-value"><span id="dValue">5</span> €</div>
+        <div class="data-label">$d$</div>
+      </div>
+    </section>
+
+    <section class="visualization">
+      <h2>Visualización del ahorro</h2>
+      <div class="chart-container"><canvas id="savingsChart"></canvas></div>
+      <div id="tooltip" class="tooltip"></div>
+      <div class="controls">
+        <div class="slider-container">
+          <label for="monthSlider" class="slider-label">Meses: <span id="monthValue">12</span></label>
+          <input type="range" id="monthSlider" class="range-slider" min="1" max="24" value="12">
+        </div>
+        <div class="slider-container">
+          <label for="incrementSlider" class="slider-label">Incremento: <span id="incrementValue">5</span> €</label>
+          <input type="range" id="incrementSlider" class="range-slider" min="1" max="20" value="5">
+        </div>
+      </div>
+    </section>
+
+    <section class="resolution">
+      <h2>Resolución y fórmulas</h2>
+      <div class="button-container">
+        <button id="showFormulaBtn" class="action-button">Ver fórmula</button>
+        <button id="calculateSumBtn" class="action-button">Calcular suma</button>
+      </div>
+
+      <div id="formulaContainer" class="formula-container">
+        <div id="formulaGeneral"></div>
+        <div class="step" id="step1Math"></div>
+        <div class="step" id="step2Math"></div>
+      </div>
+
+      <div id="sumContainer" class="sum-container">
+        <div id="sumFormula"></div>
+        <div class="progress-container">
+          <div id="progressBar" class="progress-bar"></div>
+          <div id="progressLabel" class="progress-label">0%</div>
+        </div>
+        <div class="step" id="stepSumMath"></div>
+      </div>
+    </section>
+
+    <footer>
+      <p>© Para Naiara</p>
+    </footer>
+  </div>
+
+  <script>
+    // Registrar plugin de datalabels
+    Chart.register(ChartDataLabels);
+
+    const a1 = 10;
+    let months = 12, d = 5;
+
+    // DOM
+    const monthSlider     = document.getElementById('monthSlider');
+    const incrementSlider = document.getElementById('incrementSlider');
+    const monthValue      = document.getElementById('monthValue');
+    const incrementValue  = document.getElementById('incrementValue');
+    const dValue          = document.getElementById('dValue');
+    const formulaGeneral  = document.getElementById('formulaGeneral');
+    const step1Math       = document.getElementById('step1Math');
+    const step2Math       = document.getElementById('step2Math');
+    const sumContainer    = document.getElementById('sumContainer');
+    const sumFormula      = document.getElementById('sumFormula');
+    const stepSumMath     = document.getElementById('stepSumMath');
+    const progressBar     = document.getElementById('progressBar');
+    const progressLabel   = document.getElementById('progressLabel');
+    const showFormulaBtn  = document.getElementById('showFormulaBtn');
+    const calculateSumBtn = document.getElementById('calculateSumBtn');
+    const tooltip         = document.getElementById('tooltip');
+    const coin            = document.getElementById('coin');
+    const ctx             = document.getElementById('savingsChart').getContext('2d');
+    let chart;
+
+    function genData(n, a1, d) {
+      const labels = [], data = [];
+      for (let i = 1; i <= n; i++) {
+        labels.push(`Mes ${i}`);
+        data.push(a1 + (i - 1) * d);
+      }
+      return { labels, data };
+    }
+
+    function genColors(n) {
+      return Array.from({ length: n }, (_, i) => {
+        const t = i / n;
+        const r = Math.round(108 + (253 - 108) * t);
+        const g = Math.round(92 + (121 - 92) * t);
+        const b = Math.round(231 + (168 - 231) * t);
+        return `rgba(${r},${g},${b},0.8)`;
+      });
+    }
+
+    function initChart() {
+      const { labels, data } = genData(months, a1, d);
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Ahorro (€)',
+            data,
+            backgroundColor: genColors(months),
+            borderRadius: 4,
+            datalabels: {
+              anchor: 'end',
+              align: 'start',
+              color: 'var(--dark)',
+              font: { weight: 'bold' },
+              formatter: value => `${value}€`
+            }
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: '€' } },
+            x: { title: { display: true, text: 'Mes' } }
+          },
+          plugins: {
+            tooltip: { enabled: false, external: customTooltip },
+            datalabels: {} 
+          },
+          onHover: (evt, elems) => {
+            evt.native.target.style.cursor = elems.length ? 'pointer' : 'default';
+          }
+        }
+      });
+    }
+
+    function updateChart() {
+      const { labels, data } = genData(months, a1, d);
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = data;
+      chart.data.datasets[0].backgroundColor = genColors(months);
+      chart.update();
+    }
+
+    function customTooltip(context) {
+      const model = context.tooltip;
+      if (!model.opacity) {
+        tooltip.style.opacity = 0;
+        return;
+      }
+      const idx = model.dataPoints[0].dataIndex;
+      const val = model.dataPoints[0].parsed.y;
+      const m = idx + 1;
+      tooltip.innerHTML = `$$a_{${m}} = ${a1} + (${m}-1)\\cdot${d} = ${val}\\,€$$`;
+      const rect = context.chart.canvas.getBoundingClientRect();
+      tooltip.style.opacity = 1;
+      tooltip.style.left = `${rect.left + window.pageXOffset + model.caretX}px`;
+      tooltip.style.top  = `${rect.top + window.pageYOffset  + model.caretY - 40}px`;
+    }
+
+    function animateCoin() {
+      gsap.set(coin, { top: 0, opacity: 1 });
+      gsap.timeline({ repeat: -1 })
+        .to(coin, { top: '45%', duration: 0.5, ease: 'power1.in' })
+        .to(coin, { opacity: 0, scale: 0.5, duration: 0.2 });
+    }
+
+    function updateFormulas() {
+      monthValue.textContent     = months;
+      incrementValue.textContent = d;
+      dValue.textContent         = d;
+
+      const an = a1 + (months - 1) * d;
+      const sum = months * (a1 + an) / 2;
+
+      katex.render(`a_n = a_1 + (n-1)\\cdot d`, formulaGeneral,    { throwOnError:false });
+      katex.render(`a_1 = ${a1},\\; d = ${d}\\,€`, step1Math,     { throwOnError:false });
+      katex.render(`a_{${months}} = ${a1} + (${months}-1)\\cdot${d} = ${an}\\,€`, step2Math, { throwOnError:false });
+
+      katex.render(`S_n = \\frac{n}{2}(a_1 + a_n)`, sumFormula,     { throwOnError:false });
+      katex.render(`S_{${months}} = \\frac{${months}}{2}(${a1} + ${an}) = ${sum}\\,€`, stepSumMath, { throwOnError:false });
+    }
+
+    function animateSteps(container) {
+      gsap.utils.toArray(`${container} .step`).forEach((el, i) => {
+        gsap.to(el, { opacity: 1, y: 0, duration: 0.4, delay: 0.3 * i });
+      });
+    }
+
+    function animateProgress() {
+      progressBar.style.width = '0%';
+      let count = 0;
+      const interval = setInterval(() => {
+        if (count >= months) { clearInterval(interval); return; }
+        count++;
+        const pct = Math.round((count / months) * 100);
+        progressBar.style.width = `${pct}%`;
+        progressLabel.textContent = `${pct}%`;
+      }, 1000 / months);
+    }
+
+    // Listeners
+    monthSlider.addEventListener('input', () => {
+      months = +monthSlider.value;
+      updateChart();
+      updateFormulas();
+    });
+    incrementSlider.addEventListener('input', () => {
+      d = +incrementSlider.value;
+      updateChart();
+      updateFormulas();
+    });
+    showFormulaBtn.addEventListener('click', () => {
+      sumContainer.style.display = 'none';
+      const show = formulaContainer.style.display !== 'block';
+      formulaContainer.style.display = show ? 'block' : 'none';
+      if (show) { updateFormulas(); animateSteps('#formulaContainer'); }
+    });
+    calculateSumBtn.addEventListener('click', () => {
+      formulaContainer.style.display = 'none';
+      const show = sumContainer.style.display !== 'block';
+      sumContainer.style.display = show ? 'block' : 'none';
+      if (show) { updateFormulas(); animateSteps('#sumContainer'); animateProgress(); }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initChart();
+      animateCoin();
+      updateFormulas();
+      gsap.from('.introduction', { opacity: 0, y: 20, duration: 0.6 });
+      gsap.from('.visualization', { opacity: 0, y: 20, duration: 0.6, delay: 0.3 });
+      gsap.from('.resolution', { opacity: 0, y: 20, duration: 0.6, delay: 0.6 });
+    });
+  </script>
+</body>
+
+ <!-- Botón de regreso al menú -->
+ <div style="text-align:center; margin:2rem 0;">
+  <button
+    onclick="window.location.href='index.html';"
+    style="
+      background:#6c5ce7;
+      color:white;
+      border:none;
+      padding:.8rem 1.2rem;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:1rem;
+    "
+  >
+    ← Volver al menú
+  </button>
+</div>
+
+</html>
